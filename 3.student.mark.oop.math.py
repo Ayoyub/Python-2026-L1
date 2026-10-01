@@ -21,14 +21,13 @@ def students_info(n_students):
 def n_courses():
     return int(input("Enter the number of courses: "))
 
-
 def courses_info(nb_courses):
     cou_info = []
     for _ in range(nb_courses):
         id = input("Enter course ID: ")
         name = input("Enter courses name: ")
         credits = int(input("Enter course credits: "))
-        cou_info.append({"id": id, "name": name, "credits":credits})
+        cou_info.append({"id": id, "name": name, "credits": credits})
     return cou_info
 
 
@@ -48,7 +47,6 @@ def selec_course():
         for course in cou_info:
             if id_course == course["id"]:
                 found2 = True
-                num_marks = int(input("Enter how many marks you want to grade: "))
                 n = int(input("Enter the number of students in course you want to grade: "))
                 for j in range(n):
                     id = input("Enter the students ID: ")
@@ -56,9 +54,8 @@ def selec_course():
                     for student in st:
                         if id == student["id"]:
                             found = True
-                            for k in range(num_marks):
-                                mark = math.floor(float(input("Grade: ")) * 10) / 10
-                                marks.append({"course": id_course, "student": id, "mark": mark})
+                            mark = math.floor(float(input("Grade: ")) * 10) / 10
+                            marks.append({"course": id_course, "student": id, "mark": mark})
                     if found == False:
                         print("Student not found. ")
         if found2 == False:
@@ -91,6 +88,25 @@ def showMarks():
         if found == False:
             print("Course not found. ")
 
+def get_credits(course_id):
+    for course in cou_info:
+        if course["id"] == course_id:
+            return course["credits"]
+    return 0
+
+
+def averageGpa(student_id):
+    notes = []
+    creds = []
+    for m in marks:
+        if m["student"] == student_id:
+            notes.append(m["mark"])
+            creds.append(get_credits(m["course"]))
+    if not notes or sum(creds) == 0:
+        return 0
+    notes = np.array(notes)
+    creds = np.array(creds)
+    return np.sum(notes * creds) / np.sum(creds)
 
 numstu = num_students()
 st = students_info(numstu)
