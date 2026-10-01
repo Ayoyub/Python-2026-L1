@@ -123,6 +123,121 @@ def show_ranking():
         print(f"{rank}. {student['name']} : {student['gpa']:.2f}")
 
 
+
+
+
+"""
+
+UI
+
+
+ngl i asked AI to help me to understand how curses work 
+
+"""
+
+
+
+def draw_title(stdscr, title):
+    h, w = stdscr.getmaxyx()
+    stdscr.attron(curses.color_pair(1) | curses.A_BOLD)
+    stdscr.addstr(0, 0, title.center(w - 1)[:w - 1])
+    stdscr.attroff(curses.color_pair(1) | curses.A_BOLD)
+
+
+def ask(stdscr, y, x, prompt):
+    curses.echo()
+    curses.curs_set(1)
+    stdscr.addstr(y, x, prompt)
+    stdscr.refresh()
+    value = stdscr.getstr().decode()
+    curses.noecho()
+    curses.curs_set(0)
+    return value
+
+
+def show_page(stdscr, title, lines):
+    stdscr.clear()
+    h, w = stdscr.getmaxyx()
+    draw_title(stdscr, title)
+    for i, line in enumerate(lines[:h - 5]):
+        stdscr.addstr(2 + i, 2, line[:w - 4], curses.color_pair(3))
+    stdscr.addstr(h - 2, 2, "Press any key to go back", curses.A_DIM)
+    stdscr.refresh()
+    stdscr.getch()
+
+
+def page_courses(stdscr):
+    lines = [f"{c['id']} - {c['name']} ({c['credits']} credits)" for c in cou_info]
+    show_page(stdscr, "COURSES", lines)
+
+
+def page_students(stdscr):
+    lines = [f"{s['id']} - {s['name']} (born {s['dob']})" for s in st]
+    show_page(stdscr, "STUDENTS", lines)
+
+
+def page_marks(stdscr):
+    stdscr.clear()
+    draw_title(stdscr, "MARKS BY COURSE")
+    course_id = ask(stdscr, 2, 2, "Course ID: ")
+    lines = []
+    for m in marks:
+        if m["course"] == course_id:
+            lines.append(f"{get_name(m['student'], st)} : {m['mark']}")
+    if not lines:
+        lines = ["Course not found or no marks."]
+    show_page(stdscr, "MARKS - " + course_id, lines)
+
+
+def page_ranking(stdscr):
+    sort_students_by_gpa()
+    lines = [f"{rank}. {s['name']} : {s['gpa']:.2f}"
+             for rank, s in enumerate(st, start=1)]
+    show_page(stdscr, "RANKING BY GPA", lines)
+
+
+def menu(stdscr):
+    curses.curs_set(0)
+    curses.start_color()
+    curses.init_pair(1, curses.COLOR_WHITE, curses.COLOR_BLUE)
+    curses.init_pair(2, curses.COLOR_BLACK, curses.COLOR_CYAN)
+    curses.init_pair(3, curses.COLOR_GREEN, curses.COLOR_BLACK)
+
+    options = [
+        ("List courses", page_courses),
+        ("List students", page_students),
+        ("Show marks of a course", page_marks),
+        ("Ranking by GPA", page_ranking),
+        ("Quit", None),
+    ]
+    current = 0
+
+    while True:
+        stdscr.clear()
+        draw_title(stdscr, "STUDENT MARK MANAGEMENT")
+        for i, (label, _) in enumerate(options):
+            if i == current:
+                stdscr.addstr(3 + i, 4, "> " + label, curses.color_pair(2) | curses.A_BOLD)
+            else:
+                stdscr.addstr(3 + i, 4, "  " + label)
+        stdscr.refresh()
+
+        key = stdscr.getch()
+        if key == curses.KEY_UP:
+            current = (current - 1) % len(options)
+        elif key == curses.KEY_DOWN:
+            current = (current + 1) % len(options)
+        elif key in (curses.KEY_ENTER, 10, 13):
+            action = options[current][1]
+            if action is None:
+                break
+            action(stdscr)
+
+
+
+
+
+
 numstu = num_students()
 st = students_info(numstu)
 nb_courses = n_courses()
@@ -135,3 +250,10 @@ showMarks()
 
 sort_students_by_gpa()
 show_ranking()
+
+
+curses.wrapper(menu)
+
+
+
+
