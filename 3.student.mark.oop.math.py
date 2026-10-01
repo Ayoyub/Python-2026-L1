@@ -21,6 +21,7 @@ def students_info(n_students):
 def n_courses():
     return int(input("Enter the number of courses: "))
 
+
 def courses_info(nb_courses):
     cou_info = []
     for _ in range(nb_courses):
@@ -36,6 +37,13 @@ def get_name(student_id, students):
         if student["id"] == student_id:
             return student["name"]
     return None
+
+
+def get_credits(course_id):
+    for course in cou_info:
+        if course["id"] == course_id:
+            return course["credits"]
+    return 0
 
 
 def selec_course():
@@ -88,12 +96,6 @@ def showMarks():
         if found == False:
             print("Course not found. ")
 
-def get_credits(course_id):
-    for course in cou_info:
-        if course["id"] == course_id:
-            return course["credits"]
-    return 0
-
 
 def averageGpa(student_id):
     notes = []
@@ -108,6 +110,19 @@ def averageGpa(student_id):
     creds = np.array(creds)
     return np.sum(notes * creds) / np.sum(creds)
 
+
+def sort_students_by_gpa():
+    for student in st:
+        student["gpa"] = averageGpa(student["id"])
+    st.sort(key=lambda s: s["gpa"], reverse=True)
+
+
+def show_ranking():
+    print("\nRanking by GPA (descending):")
+    for rank, student in enumerate(st, start=1):
+        print(f"{rank}. {student['name']} : {student['gpa']:.2f}")
+
+
 numstu = num_students()
 st = students_info(numstu)
 nb_courses = n_courses()
@@ -117,3 +132,6 @@ marks = selec_course()
 list_courses()
 list_students()
 showMarks()
+
+sort_students_by_gpa()
+show_ranking()
