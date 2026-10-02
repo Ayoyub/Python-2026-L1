@@ -1,0 +1,2 @@
+COURSES INFO:
+ID: C1 | Name: Math | Credits: 3
