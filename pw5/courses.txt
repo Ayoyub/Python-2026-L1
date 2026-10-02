@@ -1,2 +1,2 @@
 COURSES INFO:
-ID: C1 | Name: Math | Credits: 3
+ID: 1 | Name: 1 | Credits: 1
