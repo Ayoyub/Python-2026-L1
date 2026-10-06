@@ -1,2 +1,0 @@
-COURSES INFO:
-ID: 1 | Name: 1 | Credits: 1

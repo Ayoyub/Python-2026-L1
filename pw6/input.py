@@ -1,14 +1,21 @@
 import math
+import pickle
+import gzip
+import re
 from pathlib import Path
 from builtins import input as read_input
 from domains.student import Student
 from domains.course import Course
 
 DATA_DIR = Path(__file__).resolve().parent
+DATA_FILE = DATA_DIR / "data.pkl.gz"
+LEGACY_FILE = DATA_DIR / "students.dat.gz"
+LEGACY_PLAIN = DATA_DIR / "students.dat"
 
 
 def num_students():
     return int(read_input("Enter the number of students in your class: "))
+
 
 def n_courses():
     return int(read_input("Enter the number of courses: "))
@@ -53,25 +60,79 @@ def student_marks(courses, students):
     return marks
 
 
-def save_students(students):
-    with open(DATA_DIR / "students.txt", "w", encoding="utf-8") as file:
-        file.write("STUDENTS INFO:\n")
-        for student in students:
-            file.write(f"{student}\n")
+def save_data(students, courses, marks):
+    """Serialize the whole dataset to a single pickle stream, gzip-compressed."""
+    data = {"students": students, "courses": courses, "marks": marks}
+    with gzip.open(DATA_FILE, "wb") as file:
+        pickle.dump(data, file)
 
 
-def save_courses(courses):
-    with open(DATA_DIR / "courses.txt", "w", encoding="utf-8") as file:
-        file.write("COURSES INFO:\n")
-        for course in courses:
-            file.write(f"{course}\n")
+def load_data():
+    """Load the pickle-compressed dataset. Returns None if no file exists."""
+    if not DATA_FILE.exists():
+        return None
+    with gzip.open(DATA_FILE, "rb") as file:
+        return pickle.load(file)
 
 
-def save_marks(marks):
-    with open(DATA_DIR / "marks.txt", "w", encoding="utf-8") as file:
-        file.write("MARKS:\n")
-        for mark in marks:
-            file.write(
-                f"Course: {mark['course']} | Student: {mark['student']} | "
-                f"Mark: {mark['mark']:.1f}\n"
-            )
+def migrate_legacy_data():
+    """Convert the old text-based students.dat(.gz) into the new pickle format.
+
+    Runs once: only when the new data file is absent but a legacy file is present.
+    Returns the migrated (students, courses, marks) or None if nothing to migrate.
+    """
+    if DATA_FILE.exists():
+        return None
+    legacy = LEGACY_FILE if LEGACY_FILE.exists() else (
+        LEGACY_PLAIN if LEGACY_PLAIN.exists() else None)
+    if legacy is None:
+        return None
+
+    try:
+        with gzip.open(legacy, "rt", encoding="utf-8") as file:
+            text = file.read()
+    except (OSError, EOFError):
+        # not actually gzip (plain file) -> read as text
+        with open(legacy, "r", encoding="utf-8") as file:
+            text = file.read()
+
+    students, courses, marks = _parse_legacy_text(text)
+    save_data(students, courses, marks)
+    legacy.unlink()
+    print(f"Legacy data migrated from {legacy.name} to {DATA_FILE.name}.")
+    return students, courses, marks
+
+
+_LEGACY_MARK_RE = re.compile(
+    r"Course:\s*(\S+)\s*\|\s*Student:\s*(\S+)\s*\|\s*Mark:\s*([\d.]+)")
+
+
+def _parse_legacy_text(text):
+    students, courses, marks = [], [], []
+    section = None
+    for raw in text.splitlines():
+        line = raw.strip()
+        if not line:
+            continue
+        if line.startswith("STUDENTS"):
+            section = "students"
+            continue
+        if line.startswith("COURSES"):
+            section = "courses"
+            continue
+        if line.startswith("MARKS"):
+            section = "marks"
+            continue
+
+        if section == "students" and line.startswith("ID:"):
+            parts = [p.strip() for p in line.split("|")]
+            students.append(Student(parts[0][4:], parts[1][6:], parts[2][5:]))
+        elif section == "courses" and line.startswith("ID:"):
+            parts = [p.strip() for p in line.split("|")]
+            courses.append(Course(parts[0][4:], parts[1][6:], int(parts[2][9:])))
+        elif section == "marks":
+            m = _LEGACY_MARK_RE.match(line)
+            if m:
+                marks.append({"course": m.group(1), "student": m.group(2),
+                              "mark": float(m.group(3))})
+    return students, courses, marks

@@ -1,2 +1,0 @@
-STUDENTS INFO:
-ID: 1 | Name: 1 | DoB: 1
