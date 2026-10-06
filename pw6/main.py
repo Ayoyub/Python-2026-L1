@@ -7,18 +7,18 @@ DATA_DIR = Path(__file__).resolve().parent
 
 
 def main():
-    # 1. New pickle-compressed file exists -> load it directly.
+    # if pickle file exists lodad it
     data = input.load_data()
     if data is not None:
         print(f"Loaded saved data from {input.DATA_FILE.name}.")
         students, courses, marks = data["students"], data["courses"], data["marks"]
     else:
-        # 2. No new file -> try migrating the legacy text-based data.
+        # if no pickle file, try migrating legacy data
         migrated = input.migrate_legacy_data()
         if migrated is not None:
             students, courses, marks = migrated
         else:
-            # 3. Nothing to load -> collect fresh data from the user.
+            # still nothing then collect new data
             students = [input.input_student_info()
                         for _ in range(input.num_students())]
             courses = [input.courses_info() for _ in range(input.n_courses())]
