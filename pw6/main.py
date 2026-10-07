@@ -26,7 +26,27 @@ def main():
             input.save_data(students, courses, marks)
             print(f"Data saved to {input.DATA_FILE.name}.")
 
-    output.curses.wrapper(output.menu, students, courses, marks)
+    while True:
+        print("\n--- Student Mark Management ---")
+        print("1. List courses")
+        print("2. List students")
+        print("3. Show marks of a course")
+        print("4. Ranking by GPA")
+        print("5. Quit")
+        choice = read_input("Choice: ").strip()
+        if choice == "1":
+            output.course_print(courses)
+        elif choice == "2":
+            output.student_print(students)
+        elif choice == "3":
+            course_id = read_input("Course ID: ").strip()
+            output.display_marks(marks, students, course_id)
+        elif choice == "4":
+            output.show_ranking(students, marks, courses)
+        elif choice == "5":
+            break
+        else:
+            print("Invalid choice.")
 
 
 if __name__ == "__main__":
