@@ -1,4 +1,4 @@
-import pandas as pd
+import pandas as po
 import numpy as np
 from pathlib import Path
 from builtins import input as read_input
@@ -9,7 +9,7 @@ def student_print(students):
         {"ID": s.get_id(), "Name": s.get_name(), "DoB": s.get_dob()}
         for s in students
     ]
-    df = pd.DataFrame(data)
+    df = po.DataFrame(data)
     print(df.to_string(index=False))
 
 
@@ -18,13 +18,13 @@ def course_print(courses):
         {"ID": c.get_id(), "Name": c.get_name(), "Credits": c.get_credits()}
         for c in courses
     ]
-    df = pd.DataFrame(data)
+    df = po.DataFrame(data)
     print(df.to_string(index=False))
 
 
 def display_marks(marks, students, course_id):
     student_names = {s.get_id(): s.get_name() for s in students}
-    marks_df = pd.DataFrame(marks)
+    marks_df = po.DataFrame(marks)
     matching = marks_df[marks_df["course"] == course_id]
     if matching.empty:
         print("No marks found for this course.")
@@ -52,6 +52,6 @@ def show_ranking(students, marks, courses):
             gpa = 0.0
         ranking.append({"ID": sid, "Name": student.get_name(), "GPA": gpa})
 
-    df = pd.DataFrame(ranking).sort_values("GPA", ascending=False).reset_index(drop=True)
+    df = po.DataFrame(ranking).sort_values("GPA", ascending=False).reset_index(drop=True)
     df.index = df.index + 1
     print(df.to_string())
