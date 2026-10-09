@@ -1,7 +1,9 @@
 import math
 import pickle
 import gzip
+import tempfile
 import re
+import shutil
 from pathlib import Path
 from builtins import input as read_input
 from domains.student import Student
@@ -11,6 +13,7 @@ DATA_DIR = Path(__file__).resolve().parent
 DATA_FILE = DATA_DIR / "data.pkl.gz"
 LEGACY_FILE = DATA_DIR / "students.dat.gz"
 LEGACY_PLAIN = DATA_DIR / "students.dat"
+BACKUP_DIR = DATA_DIR / "backup"
 
 
 def num_students():
@@ -61,10 +64,37 @@ def student_marks(courses, students):
 
 
 def save_data(students, courses, marks):
-    """Serialize the whole dataset to a single pickle stream, gzip-compressed."""
+    """Serialize the whole dataset to a single pickle stream, gzip-compressed.
+    Writes to a temp file first, then moves atomically (PDF 4: temp files).
+    """
     data = {"students": students, "courses": courses, "marks": marks}
-    with gzip.open(DATA_FILE, "wb") as file:
-        pickle.dump(data, file)
+    tmp_path = None
+    with tempfile.NamedTemporaryFile(mode="wb", suffix=".tmp", delete=False, dir=str(DATA_DIR)) as tmp:
+        tmp_path = Path(tmp.name)
+    try:
+        with gzip.open(tmp_path, "wb") as file:
+            pickle.dump(data, file)
+        # Remove existing file first to avoid Windows lock issues
+        if DATA_FILE.exists():
+            DATA_FILE.unlink()
+        tmp_path.rename(DATA_FILE)
+    except Exception:
+        if tmp_path and tmp_path.exists():
+            tmp_path.unlink(missing_ok=True)
+            raise
+
+
+def backup():
+    """Create a timestamped backup in backup/ directory (PDF 4: directories + shutil)."""
+    if not DATA_FILE.exists():
+        return
+    BACKUP_DIR.mkdir(exist_ok=True)
+    import datetime
+    ts = datetime.datetime.fromtimestamp(DATA_FILE.stat().st_mtime)
+    ts_str = ts.strftime("%Y%m%d_%H%M%S")
+    dest = BACKUP_DIR / f"data_backup_{ts_str}.pkl.gz"
+    shutil.copy2(DATA_FILE, dest)
+    print(f"Backup saved to {dest.name}")
 
 
 def load_data():

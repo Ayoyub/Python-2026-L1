@@ -43,6 +43,10 @@ def main():
             output.display_marks(marks, students, course_id)
         elif choice == "4":
             output.show_ranking(students, marks, courses)
+            backup = read_input("Create a backup before continuing? (y/n): ").strip().lower()
+            if backup == "y":
+                input.save_data(students, courses, marks)  # save current state before backup
+                input.backup()
         elif choice == "5":
             break
         else:

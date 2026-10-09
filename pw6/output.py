@@ -1,31 +1,57 @@
+import pandas as pd
+import numpy as np
+from pathlib import Path
+from builtins import input as read_input
+
+
 def student_print(students):
-    for student in students:
-        print(f"{student.get_id()} - {student.get_name()} (born {student.get_dob()})")
+    data = [
+        {"ID": s.get_id(), "Name": s.get_name(), "DoB": s.get_dob()}
+        for s in students
+    ]
+    df = pd.DataFrame(data)
+    print(df.to_string(index=False))
+
 
 def course_print(courses):
-    for course in courses:
-        print(f"{course.get_id()} - {course.get_name()} ({course.get_credits()} credits)")
+    data = [
+        {"ID": c.get_id(), "Name": c.get_name(), "Credits": c.get_credits()}
+        for c in courses
+    ]
+    df = pd.DataFrame(data)
+    print(df.to_string(index=False))
+
 
 def display_marks(marks, students, course_id):
-    student_names = {student.get_id(): student.get_name() for student in students}
-    matching_marks = [mark for mark in marks if mark["course"] == course_id]
-    if not matching_marks:
+    student_names = {s.get_id(): s.get_name() for s in students}
+    marks_df = pd.DataFrame(marks)
+    matching = marks_df[marks_df["course"] == course_id]
+    if matching.empty:
         print("No marks found for this course.")
         return
-    for mark in matching_marks:
-        print(f"{student_names.get(mark['student'], 'Unknown student')}: {mark['mark']:.1f}")
+    matching = matching.rename(columns={"student": "ID", "mark": "Grade"})
+    matching["Name"] = matching["ID"].map(student_names).fillna("Unknown student")
+    print(matching[["Name", "Grade"]].to_string(index=False))
 
 
 def show_ranking(students, marks, courses):
-    credits = {course.get_id(): course.get_credits() for course in courses}
+    credits = {c.get_id(): c.get_credits() for c in courses}
+    credits_arr = np.array([credits.get(m["course"], 0) for m in marks])
+    marks_arr = np.array([m["mark"] for m in marks])
+
     ranking = []
     for student in students:
-        student_marks = [mark for mark in marks if mark["student"] == student.get_id()]
-        total_credits = sum(credits.get(mark["course"], 0) for mark in student_marks)
-        weighted_marks = sum(mark["mark"] * credits.get(mark["course"], 0)
-                             for mark in student_marks)
-        gpa = weighted_marks / total_credits if total_credits else 0
-        ranking.append((student, gpa))
+        sid = student.get_id()
+        mask = np.array([m["student"] == sid for m in marks])
+        student_marks_arr = marks_arr[mask]
+        student_credits_arr = credits_arr[mask]
+        total_credits = float(np.sum(student_credits_arr))
+        if total_credits > 0:
+            gpa = float(np.sum(student_marks_arr * student_credits_arr) / total_credits)
+        else:
+            gpa = 0.0
+        ranking.append({"ID": sid, "Name": student.get_name(), "GPA": gpa})
 
-    for rank, (student, gpa) in enumerate(sorted(ranking, key=lambda item: item[1], reverse=True), 1):
-        print(f"{rank}. {student.get_name()} : {gpa:.2f}")
+    df = pd.DataFrame(ranking).sort_values("GPA", ascending=False).reset_index(drop=True)
+    df.index = df.index + 1
+    print(df.to_string())
