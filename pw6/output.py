@@ -1,18 +1,19 @@
-import pandas as po
+import pandas as pd
 import numpy as np
 from pathlib import Path
 from builtins import input as read_input
 
+DATA_DIR = Path(__file__).resolve().parent
+
 
 def student_print(students):
-            df = pd.DataFrame({
-            "studentId": [s.get_id() for s in students],
-            "name": [s.get_name() for s in students],
-            "Dob": [s.get_dob() for s in students],
-            })
-            print(df)
-            df.to_csv('students.csv', index=False)
-
+    df = pd.DataFrame({
+        "studentId": [s.get_id() for s in students],
+        "name": [s.get_name() for s in students],
+        "Dob": [s.get_dob() for s in students],
+    })
+    print(df.to_string(index=False))
+    df.to_csv(DATA_DIR / "students.csv", index=False)
 
 
 def course_print(courses):
@@ -20,15 +21,14 @@ def course_print(courses):
         {"ID": c.get_id(), "Name": c.get_name(), "Credits": c.get_credits()}
         for c in courses
     ]
-    df = po.DataFrame(data)
+    df = pd.DataFrame(data)
     print(df.to_string(index=False))
-    df.to_csv('courses.csv', index=False)
-    
+    df.to_csv(DATA_DIR / "courses.csv", index=False)
 
 
 def display_marks(marks, students, course_id):
     student_names = {s.get_id(): s.get_name() for s in students}
-    marks_df = po.DataFrame(marks)
+    marks_df = pd.DataFrame(marks)
     matching = marks_df[marks_df["course"] == course_id]
     if matching.empty:
         print("No marks found for this course.")
@@ -56,6 +56,6 @@ def show_ranking(students, marks, courses):
             gpa = 0.0
         ranking.append({"ID": sid, "Name": student.get_name(), "GPA": gpa})
 
-    df = po.DataFrame(ranking).sort_values("GPA", ascending=False).reset_index(drop=True)
+    df = pd.DataFrame(ranking).sort_values("GPA", ascending=False).reset_index(drop=True)
     df.index = df.index + 1
     print(df.to_string())

@@ -26,6 +26,8 @@ def main():
             input.save_data(students, courses, marks)
             print(f"Data saved to {input.DATA_FILE.name}.")
 
+
+
     while True:
         print("\n--- Student Mark Management ---")
         print("1. List courses")

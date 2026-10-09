@@ -4,6 +4,7 @@ import gzip
 import tempfile
 import re
 import shutil
+import pandas as po
 from pathlib import Path
 from builtins import input as read_input
 from domains.student import Student
@@ -39,6 +40,7 @@ def courses_info():
 
 
 def student_marks(courses, students):
+    import pandas as pd
     marks = []
     number_of_courses = int(read_input("Enter the number of courses to grade: "))
     for _ in range(number_of_courses):
@@ -60,6 +62,11 @@ def student_marks(courses, students):
 
             mark = math.floor(float(read_input("Grade: ")) * 10) / 10
             marks.append({"course": course.get_id(), "student": student.get_id(), "mark": mark})
+
+    # Build DataFrame ONCE, after all marks are collected
+    df = pd.DataFrame(marks)
+    df.to_csv(DATA_DIR / "marks.csv", index=False)
+    print(f"Saved {len(marks)} marks to marks.csv")
     return marks
 
 
