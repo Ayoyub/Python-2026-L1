@@ -5,12 +5,14 @@ from builtins import input as read_input
 
 
 def student_print(students):
-    data = [
-        {"ID": s.get_id(), "Name": s.get_name(), "DoB": s.get_dob()}
-        for s in students
-    ]
-    df = po.DataFrame(data)
-    print(df.to_string(index=False))
+            df = pd.DataFrame({
+            "studentId": [s.get_id() for s in students],
+            "name": [s.get_name() for s in students],
+            "Dob": [s.get_dob() for s in students],
+            })
+            print(df)
+            df.to_csv('students.csv', index=False)
+
 
 
 def course_print(courses):
@@ -20,6 +22,8 @@ def course_print(courses):
     ]
     df = po.DataFrame(data)
     print(df.to_string(index=False))
+    df.to_csv('courses.csv', index=False)
+    
 
 
 def display_marks(marks, students, course_id):
