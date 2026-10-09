@@ -5,7 +5,8 @@ from builtins import input as read_input
 
 DATA_DIR = Path(__file__).resolve().parent
 
-
+def query():
+    print("finish this asap future ayoso pls")
 def main():
     # if pickle file exists lodad it
     data = input.load_data()
@@ -34,7 +35,8 @@ def main():
         print("2. List students")
         print("3. Show marks of a course")
         print("4. Ranking by GPA")
-        print("5. Quit")
+        print("5. Query over .csv")
+        print("6. Quit")
         choice = read_input("Choice: ").strip()
         if choice == "1":
             print("\n")
@@ -59,8 +61,16 @@ def main():
                 input.save_data(students, courses, marks)  # save current state before backup
                 input.backup()
                 print("\n")
+
         elif choice == "5":
+            print("\n")
+            query()
+            print("\n")
+
+
+        elif choice == "6":
             break
+
         else:
             print("\n")
             print("Invalid choice.")
