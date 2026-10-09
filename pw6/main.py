@@ -35,22 +35,34 @@ def main():
         print("5. Quit")
         choice = read_input("Choice: ").strip()
         if choice == "1":
+            print("\n")
             output.course_print(courses)
+            print("\n")
         elif choice == "2":
+            print("\n")
             output.student_print(students)
+            print("\n")
         elif choice == "3":
+            print("\n")
             course_id = read_input("Course ID: ").strip()
             output.display_marks(marks, students, course_id)
+            print("\n")
         elif choice == "4":
+            print("\n")
             output.show_ranking(students, marks, courses)
+            print("\n")
             backup = read_input("Create a backup before continuing? (y/n): ").strip().lower()
             if backup == "y":
+                print("\n")
                 input.save_data(students, courses, marks)  # save current state before backup
                 input.backup()
+                print("\n")
         elif choice == "5":
             break
         else:
+            print("\n")
             print("Invalid choice.")
+            print("\n")
 
 
 if __name__ == "__main__":
