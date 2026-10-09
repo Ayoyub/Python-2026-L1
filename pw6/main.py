@@ -6,7 +6,17 @@ from builtins import input as read_input
 DATA_DIR = Path(__file__).resolve().parent
 
 def query():
-    print("finish this asap future ayoso pls")
+    import pandas as po
+    choice = print("Which table do you want to look up ?\n Choices are : students , courses , marks (case sensitive): \n")
+    if choice == "students":
+        print("placeholder")
+        
+    elif choice == "courses":
+        print("placeholder")
+    elif choice == "marks":
+        print("placeholder")
+    
+
 def main():
     # if pickle file exists lodad it
     data = input.load_data()
