@@ -55,6 +55,12 @@ def displayMarks():
 	for i in range(len(marks)):
 		if marks[i].get("Course") == choose:
 			print(marks[i])
+		else:
+			print("wrong course name, try again (to exit, type STOP)")
+			displayMarks()
+		if choose == "STOP":
+			break
+
 
 # Main
 # I/ Students and Courses
